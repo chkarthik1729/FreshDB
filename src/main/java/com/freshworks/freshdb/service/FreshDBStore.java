@@ -2,10 +2,7 @@ package com.freshworks.freshdb.service;
 
 import com.freshworks.freshdb.KeyStore;
 import com.freshworks.freshdb.KeyStoreException;
-import com.freshworks.freshdb.exception.KeyAlreadyExistsException;
-import com.freshworks.freshdb.exception.KeyNotFoundException;
-import com.freshworks.freshdb.exception.KeyTooLargeException;
-import com.freshworks.freshdb.exception.ValueTooLargeException;
+import com.freshworks.freshdb.exception.*;
 import com.google.common.base.Utf8;
 
 import java.io.File;
@@ -47,10 +44,10 @@ public class FreshDBStore implements KeyStore {
         deleteExpiredKeys();
         validateSizeConstraints(key, value);
         ensureKeyDoesNotExist(key);
-        long filePointer = storageManager.allocate(Utf8.encodedLength(value));
-        KeyMeta meta = KeyMeta.from(key, filePointer, System.currentTimeMillis() + ttlInSeconds * 1000);
+        StorageEntry entry = storageManager.allocate(Utf8.encodedLength(value) + 2);
+        KeyMeta meta = KeyMeta.from(key, entry, System.currentTimeMillis() + ttlInSeconds * 1000);
         keyToMetaMap.put(key, meta);
-        writeValue(filePointer, value);
+        writeValue(entry.getFilePointer(), value);
         keysMetaWithExpiry.add(meta);
     }
 
@@ -58,7 +55,7 @@ public class FreshDBStore implements KeyStore {
     public void delete(String key) throws KeyStoreException {
         KeyMeta meta = keyToMetaMap.remove(key);
         if (meta == null) throw new KeyNotFoundException();
-        storageManager.free(meta.getFilePointer());
+        storageManager.free(meta.getStorageEntry());
     }
 
     @Override
@@ -69,7 +66,7 @@ public class FreshDBStore implements KeyStore {
             delete(key);
             throw new KeyNotFoundException();
         }
-        return readValue(meta.getFilePointer());
+        return readValue(meta.getStorageEntry().getFilePointer());
     }
 
     private void validateSizeConstraints(String key, String value) throws KeyStoreException {
@@ -97,10 +94,10 @@ public class FreshDBStore implements KeyStore {
         valuesFile.writeUTF(value);
     }
 
-    private void deleteExpiredKeys() {
+    private void deleteExpiredKeys() throws KeyStoreException {
         KeyMeta curr;
         while ((curr = keysMetaWithExpiry.first()).isExpired()) {
-            storageManager.free(curr.getFilePointer());
+            delete(curr.getKey());
             keysMetaWithExpiry.remove(curr);
         }
     }

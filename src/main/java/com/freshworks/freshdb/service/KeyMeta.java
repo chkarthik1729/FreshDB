@@ -3,16 +3,16 @@ package com.freshworks.freshdb.service;
 public class KeyMeta {
     private final String key;
     private final long expiresAt;
-    private final long filePointer;
+    private final StorageEntry storageEntry;
 
-    private KeyMeta(String key, long filePointer, long expiresAt) {
+    private KeyMeta(String key, StorageEntry storageEntry, long expiresAt) {
         this.key = key;
         this.expiresAt = expiresAt;
-        this.filePointer = filePointer;
+        this.storageEntry = storageEntry;
     }
 
-    public static KeyMeta from(String key, long filePointer, long expiresAt) {
-        return new KeyMeta(key, filePointer, expiresAt);
+    public static KeyMeta from(String key, StorageEntry storageEntry, long expiresAt) {
+        return new KeyMeta(key, storageEntry, expiresAt);
     }
 
     public boolean isExpired() {
@@ -23,8 +23,8 @@ public class KeyMeta {
         return key;
     }
 
-    public long getFilePointer() {
-        return filePointer;
+    public StorageEntry getStorageEntry() {
+        return storageEntry;
     }
 
     public long expiresAt() {

@@ -34,10 +34,10 @@ public interface KeyStore {
 
     /**
      *
-     * @param ket
+     * @param key
      * @return
      * @throws IOException
      * @throws KeyNotFoundException
      */
-    String read(String ket) throws IOException, KeyStoreException;
+    String read(String key) throws IOException, KeyStoreException;
 }
