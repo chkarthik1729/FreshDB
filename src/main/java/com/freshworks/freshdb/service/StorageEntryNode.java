@@ -1,8 +1,9 @@
 package com.freshworks.freshdb.service;
 
 public class StorageEntryNode extends StorageEntry {
-    StorageEntryNode prev;
-    StorageEntryNode next;
+    private StorageEntryNode prev;
+    private StorageEntryNode next;
+    private boolean isAllocated;
 
     public StorageEntryNode(long filePointer, int sizeInBytes, StorageEntryNode prev, StorageEntryNode next) {
         super(filePointer, sizeInBytes);
@@ -27,7 +28,19 @@ public class StorageEntryNode extends StorageEntry {
         this.next = next;
     }
 
+    boolean isAllocated() {
+        return isAllocated;
+    }
+
+    void setAllocated(boolean allocated) {
+        isAllocated = allocated;
+    }
+
     public void setSizeInBytes(int sizeInBytes) {
         super.setSizeInBytes(sizeInBytes);
+    }
+
+    public void setFilePointer(long filePointer) {
+         super.setFilePointer(filePointer);
     }
 }

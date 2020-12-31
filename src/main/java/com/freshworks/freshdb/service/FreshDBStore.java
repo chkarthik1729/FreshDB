@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.charset.StandardCharsets;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,16 +36,21 @@ public class FreshDBStore implements KeyStore {
 
     @Override
     public void create(String key, String value) throws KeyStoreException, IOException {
-        create(key, value, Long.MAX_VALUE);
+        createInternal(key, value, Long.MAX_VALUE);
     }
 
     @Override
-    public void create(String key, String value, long ttlInSeconds) throws KeyStoreException, IOException {
+    public void create(String key, String value, long ttl) throws IOException, KeyStoreException {
+        long expiresAt = System.currentTimeMillis() + ttl * 1000;
+        createInternal(key, value, expiresAt);
+    }
+
+    private void createInternal(String key, String value, long expiresAt) throws KeyStoreException, IOException {
         deleteExpiredKeys();
         validateSizeConstraints(key, value);
         ensureKeyDoesNotExist(key);
         StorageEntry entry = storageManager.allocate(Utf8.encodedLength(value) + 2);
-        KeyMeta meta = KeyMeta.from(key, entry, System.currentTimeMillis() + ttlInSeconds * 1000);
+        KeyMeta meta = KeyMeta.from(key, entry, expiresAt);
         keyToMetaMap.put(key, meta);
         writeValue(entry.getFilePointer(), value);
         keysMetaWithExpiry.add(meta);
@@ -71,7 +76,7 @@ public class FreshDBStore implements KeyStore {
 
     private void validateSizeConstraints(String key, String value) throws KeyStoreException {
         if (key.length() > MAX_KEY_LENGTH) throw new KeyTooLargeException();
-        if (value.getBytes(StandardCharsets.UTF_8).length > MAX_VALUE_SIZE) throw new ValueTooLargeException();
+        if (Utf8.encodedLength(value) > MAX_VALUE_SIZE) throw new ValueTooLargeException();
     }
 
     private void ensureKeyDoesNotExist(String key) throws KeyStoreException {
@@ -95,6 +100,8 @@ public class FreshDBStore implements KeyStore {
     }
 
     private void deleteExpiredKeys() throws KeyStoreException {
+        if (keysMetaWithExpiry.size() == 0) return;
+
         KeyMeta curr;
         while ((curr = keysMetaWithExpiry.first()).isExpired()) {
             delete(curr.getKey());

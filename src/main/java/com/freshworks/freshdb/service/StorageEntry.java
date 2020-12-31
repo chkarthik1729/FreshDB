@@ -1,20 +1,25 @@
 package com.freshworks.freshdb.service;
 
-class StorageEntry {
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+abstract class StorageEntry {
     private long filePointer;
     private int sizeInBytes;
-    private boolean isAllocated;
+    private final ReadWriteLock lock;
 
     StorageEntry(long filePointer, int sizeInBytes) {
         this.filePointer = filePointer;
         this.sizeInBytes = sizeInBytes;
+        lock  = new ReentrantReadWriteLock();
     }
 
     long getFilePointer() {
         return filePointer;
     }
 
-    void setFilePointer(long filePointer) {
+    protected void setFilePointer(long filePointer) {
         this.filePointer = filePointer;
     }
 
@@ -22,15 +27,15 @@ class StorageEntry {
         return sizeInBytes;
     }
 
-    boolean isAllocated() {
-        return isAllocated;
-    }
-
-    void setAllocated(boolean allocated) {
-        isAllocated = allocated;
-    }
-
     protected void setSizeInBytes(int sizeInBytes) {
         this.sizeInBytes = sizeInBytes;
+    }
+
+    Lock getReadLock() {
+        return lock.readLock();
+    }
+
+    Lock getWriteLock() {
+        return lock.writeLock();
     }
 }
