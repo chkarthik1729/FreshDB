@@ -36,8 +36,8 @@ public class StorageEntryNode extends StorageEntry {
         isAllocated = allocated;
     }
 
-    public void setSizeInBytes(int sizeInBytes) {
-        super.setSizeInBytes(sizeInBytes);
+    public void setSize(int size) {
+        super.setSize(size);
     }
 
     public void setFilePointer(long filePointer) {

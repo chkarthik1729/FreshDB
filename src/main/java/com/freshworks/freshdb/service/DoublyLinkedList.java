@@ -37,10 +37,15 @@ public class DoublyLinkedList {
     }
 
     void addAfter(StorageEntryNode e, StorageEntryNode node) {
-        node.setPrev(e);
-        node.setNext(e.getNext());
-        e.setNext(node);
-        size++;
+        assert e != null;
+        if (e.getPrev() == null) addFirst(node);
+        else if (e.getNext() == null) addLast(node);
+        else {
+            node.setPrev(e);
+            node.setNext(e.getNext());
+            e.setNext(node);
+            size++;
+        }
     }
 
     void remove(StorageEntryNode e) {
@@ -69,5 +74,9 @@ public class DoublyLinkedList {
 
     StorageEntryNode getHead() {
         return head;
+    }
+
+    int size() {
+        return size;
     }
 }

@@ -9,7 +9,7 @@ public class StorageManager {
 
     private static final int TOTAL_SPACE = 1024 * 1024 * 1024;  // 1 GB
 
-    private RandomAccessFile file;
+    private final RandomAccessFile file;
     private DoublyLinkedList storageEntryList;
     private int usedSpace = 0;
 
@@ -48,11 +48,11 @@ public class StorageManager {
                 file.seek(curr.getFilePointer());
                 file.writeUTF(contents);
 
-                int totalSize = curr.getSizeInBytes() + next.getSizeInBytes();
-                curr.setSizeInBytes(next.getSizeInBytes());
-                next.setSizeInBytes(totalSize - curr.getSizeInBytes());
+                int totalSize = curr.getSize() + next.getSize();
+                curr.setSize(next.getSize());
+                next.setSize(totalSize - curr.getSize());
 
-                next.setFilePointer(curr.getFilePointer() + curr.getSizeInBytes());
+                next.setFilePointer(curr.getFilePointer() + curr.getSize());
             }
             curr = next;
         }
@@ -69,7 +69,7 @@ public class StorageManager {
         StorageEntryNode prev = entryNode.getPrev();
         if (prev != null && !prev.isAllocated()) {
             entryNode.setFilePointer(prev.getFilePointer());
-            entryNode.setSizeInBytes(entryNode.getSizeInBytes() + prev.getSizeInBytes());
+            entryNode.setSize(entryNode.getSize() + prev.getSize());
             storageEntryList.remove(prev);
         }
     }
@@ -77,7 +77,7 @@ public class StorageManager {
     private void mergeNextNode(StorageEntryNode entryNode) {
         StorageEntryNode next = entryNode.getNext();
         if (next != null && !next.isAllocated()) {
-            entryNode.setSizeInBytes(entryNode.getSizeInBytes() + next.getSizeInBytes());
+            entryNode.setSize(entryNode.getSize() + next.getSize());
             storageEntryList.remove(next);
         }
     }
@@ -86,12 +86,14 @@ public class StorageManager {
         StorageEntryNode bestFitNode = getBestFitNode(noOfBytes);
         if (bestFitNode == null) return null;
 
-        int extraSpace = bestFitNode.getSizeInBytes() - noOfBytes;
+        int extraSpace = bestFitNode.getSize() - noOfBytes;
         if (extraSpace > 0) {
             StorageEntryNode extraNode = new StorageEntryNode(bestFitNode.getFilePointer() + noOfBytes,
                     extraSpace, null, null);
+            bestFitNode.setSize(noOfBytes);
             storageEntryList.addAfter(bestFitNode, extraNode);
         }
+
         bestFitNode.setAllocated(true);
         return bestFitNode;
     }
@@ -106,9 +108,9 @@ public class StorageManager {
                 continue;
             }
 
-            if (curr.getSizeInBytes() >= noOfBytes) {
+            if (curr.getSize() >= noOfBytes) {
                 if (bestFitNode == null) bestFitNode = curr;
-                else if (bestFitNode.getSizeInBytes() > curr.getSizeInBytes()) bestFitNode = curr;
+                else if (bestFitNode.getSize() > curr.getSize()) bestFitNode = curr;
             }
             curr = curr.getNext();
         }

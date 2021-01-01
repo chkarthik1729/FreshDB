@@ -29,7 +29,7 @@ public class FreshDBStore implements KeyStore {
     }
 
     public FreshDBStore(String fileName) throws FileNotFoundException {
-        String valuesFileName = fileName == null ? ("./FreshDB@" + hashCode()) : fileName;
+        String valuesFileName = fileName == null ? ("./DBFiles/FreshDB@" + hashCode()) : fileName;
         valuesFile = new RandomAccessFile(new File(valuesFileName), "rwd");
         storageManager = StorageManager.getInstance(valuesFile);
     }
@@ -61,6 +61,7 @@ public class FreshDBStore implements KeyStore {
         KeyMeta meta = keyToMetaMap.remove(key);
         if (meta == null) throw new KeyNotFoundException();
         storageManager.free(meta.getStorageEntry());
+        keysMetaWithExpiry.remove(meta);
     }
 
     @Override
@@ -100,10 +101,8 @@ public class FreshDBStore implements KeyStore {
     }
 
     private void deleteExpiredKeys() throws KeyStoreException {
-        if (keysMetaWithExpiry.size() == 0) return;
-
         KeyMeta curr;
-        while ((curr = keysMetaWithExpiry.first()).isExpired()) {
+        while (!keysMetaWithExpiry.isEmpty() && (curr = keysMetaWithExpiry.first()).isExpired()) {
             delete(curr.getKey());
             keysMetaWithExpiry.remove(curr);
         }

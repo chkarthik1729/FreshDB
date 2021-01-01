@@ -6,12 +6,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 abstract class StorageEntry {
     private long filePointer;
-    private int sizeInBytes;
+    private int size;
     private final ReadWriteLock lock;
 
-    StorageEntry(long filePointer, int sizeInBytes) {
+    StorageEntry(long filePointer, int size) {
         this.filePointer = filePointer;
-        this.sizeInBytes = sizeInBytes;
+        this.size = size;
         lock  = new ReentrantReadWriteLock();
     }
 
@@ -23,12 +23,12 @@ abstract class StorageEntry {
         this.filePointer = filePointer;
     }
 
-    int getSizeInBytes() {
-        return sizeInBytes;
+    int getSize() {
+        return size;
     }
 
-    protected void setSizeInBytes(int sizeInBytes) {
-        this.sizeInBytes = sizeInBytes;
+    protected void setSize(int size) {
+        this.size = size;
     }
 
     Lock getReadLock() {

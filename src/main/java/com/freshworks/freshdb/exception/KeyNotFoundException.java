@@ -5,6 +5,6 @@ import com.freshworks.freshdb.KeyStoreException;
 public class KeyNotFoundException extends KeyStoreException {
 
     public KeyNotFoundException() {
-        super("KeyMeta is not available in the datastore");
+        super("Key not found in the datastore");
     }
 }
