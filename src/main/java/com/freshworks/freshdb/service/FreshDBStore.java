@@ -53,7 +53,7 @@ public class FreshDBStore implements KeyStore {
         createInternal(key, value, expiresAt);
     }
 
-    private void createInternal(String key, String value, long expiresAt) throws KeyStoreException, IOException {
+    private synchronized void createInternal(String key, String value, long expiresAt) throws KeyStoreException, IOException {
         deleteExpiredKeys();
         validateSizeConstraints(key, value);
         ensureKeyDoesNotExist(key);
@@ -65,7 +65,7 @@ public class FreshDBStore implements KeyStore {
     }
 
     @Override
-    public void delete(String key) throws KeyStoreException {
+    public synchronized void delete(String key) throws KeyStoreException {
         KeyMeta meta = keyToMetaMap.remove(key);
         if (meta == null) throw new KeyNotFoundException();
         storageManager.free(meta.getStorageEntry());
@@ -73,7 +73,7 @@ public class FreshDBStore implements KeyStore {
     }
 
     @Override
-    public String read(String key) throws IOException, KeyStoreException {
+    public synchronized String read(String key) throws IOException, KeyStoreException {
         KeyMeta meta = keyToMetaMap.get(key);
         if (meta == null) throw new KeyNotFoundException();
         if (meta.isExpired()) {
@@ -117,7 +117,7 @@ public class FreshDBStore implements KeyStore {
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         valuesFileLock.release();
     }
 
