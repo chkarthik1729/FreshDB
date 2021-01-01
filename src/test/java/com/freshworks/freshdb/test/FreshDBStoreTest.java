@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.util.Arrays;
@@ -24,13 +23,14 @@ public class FreshDBStoreTest {
     private static KeyStore keyStore;
 
     @BeforeAll
-    public static void getKeyStoreInstance() throws FileNotFoundException {
+    public static void getKeyStoreInstance() throws IOException {
         keyStore = new FreshDBStore();
     }
 
     @BeforeEach
-    public void refreshDataStore() throws FileNotFoundException {
+    public void refreshDataStore() throws IOException {
         File file = new File("./DBFiles/");
+        if (!file.exists()) file.mkdir();
         assert(file.isDirectory());
         for (File dbFile : file.listFiles()) {
             dbFile.delete();

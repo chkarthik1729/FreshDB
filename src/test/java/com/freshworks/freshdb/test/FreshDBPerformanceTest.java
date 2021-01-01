@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,8 +16,9 @@ public class FreshDBPerformanceTest {
     private static KeyStore keyStore;
 
     @BeforeEach
-    public void refreshDataStore() throws FileNotFoundException {
-        File file = new File("./DBFiles/");
+    public void refreshDataStore() throws IOException {
+        File file = new File("./DBFiles");
+        if (!file.exists()) file.mkdirs();
         assert(file.isDirectory());
         for (File dbFile : file.listFiles()) {
             dbFile.delete();
@@ -27,7 +27,7 @@ public class FreshDBPerformanceTest {
     }
 
     @Test
-    public void testCreation() throws InvocationTargetException, IllegalAccessException, FileNotFoundException {
+    public void testCreation() throws InvocationTargetException, IllegalAccessException, IOException {
         Class<?> performanceClass = this.getClass();
         Method[] methods = performanceClass.getDeclaredMethods();
         for (Method method : methods) {

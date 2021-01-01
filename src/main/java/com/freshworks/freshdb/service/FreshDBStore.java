@@ -6,7 +6,6 @@ import com.freshworks.freshdb.exception.*;
 import com.google.common.base.Utf8;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -24,13 +23,19 @@ public class FreshDBStore implements KeyStore {
     private final SortedSet<KeyMeta> keysMetaWithExpiry =
             Collections.synchronizedSortedSet(new TreeSet<>(new CompareExpiryOfMeta()));
 
-    public FreshDBStore() throws FileNotFoundException {
+    public FreshDBStore() throws IOException {
         this(null);
     }
 
-    public FreshDBStore(String fileName) throws FileNotFoundException {
-        String valuesFileName = fileName == null ? ("./DBFiles/FreshDB@" + hashCode()) : fileName;
-        valuesFile = new RandomAccessFile(new File(valuesFileName), "rwd");
+    public FreshDBStore(String fileName) throws IOException {
+        File file;
+        if (fileName == null) {
+            File valuesFolder = new File("./DBFiles");
+            if (!valuesFolder.exists()) valuesFolder.mkdir();
+            file = new File(valuesFolder, "FreshDB@" + hashCode());
+        } else file = new File(fileName);
+
+        valuesFile = new RandomAccessFile(file, "rwd");
         storageManager = StorageManager.getInstance(valuesFile);
     }
 
