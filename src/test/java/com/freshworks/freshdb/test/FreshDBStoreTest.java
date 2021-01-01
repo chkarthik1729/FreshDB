@@ -16,7 +16,6 @@ import java.io.IOException;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -101,6 +100,8 @@ public class FreshDBStoreTest {
                 () -> keyStore.create("largeValue-key", largeValue));
     }
 
+    // Heavy test. Would take forever. Run if you really want to see the results
+    /*
     @Test
     public void testStorageLimit() throws FileNotFoundException {
         char[] value = new char[16 * 1024];
@@ -113,35 +114,44 @@ public class FreshDBStoreTest {
         assertDoesNotThrow(() -> createMultipleKeysWithValue(0, 10_000, _16KValue));
         refreshDataStore();
         // 1GB Storage -> (1024 * 1024) KB; (1024 * 1024) / 16 = 65,536 keys
-        assertThrows(SpaceNotAvailableException.class, () -> createMultipleKeysWithValue(0, 100_000, _16KValue));
+        assertThrows(SpaceNotAvailableException.class,
+                () -> createMultipleKeysWithValue(0, 100_000, _16KValue));
     }
+     */
 
+
+
+    // Heavy test. Would take forever. Run if you really want to see the results
+    /*
     @Test
     public void testCompaction() {
-        char[] value = new char[16 * 1024];
-        Arrays.fill(value, 'v');
-        String _16KValue = new String(value);
-        // 1GB Storage -> (1024 * 1024) KB; (1024 * 1024) / 16 = 65,536 keys
-        assertDoesNotThrow(() -> createMultipleKeysWithValue(0, 60_000, _16KValue));
-        deleteMultipleRandomKeysWithIn(10000, 60_000);
-        assertDoesNotThrow(() -> createMultipleKeysWithValue(60_000, 5_000, _16KValue));
+        String _10KValue = "v".repeat(10 * 1024);
+        String _16KValue = "v".repeat(16 * 1024);
+        // db can store 104837 10KB values
+        assertDoesNotThrow(() -> createMultipleKeysWithValue(0, 104_837, _10KValue));
+        deleteMultipleRandomKeysWithIn(10_000, 60_000);
+        assertDoesNotThrow(() -> createMultipleKeysWithValue(104_837, 6_250, _16KValue));
     }
+    */
 
     static void createMultipleKeysWithValue(int keyOffset, int noOfKeys, String value) throws IOException, KeyStoreException {
         for (int i = 0; i < noOfKeys; i++) {
             String key = "key-" + (i + keyOffset);
+            System.out.println("Creating " + key);
             keyStore.create(key, value);
         }
     }
 
     static void deleteMultipleRandomKeysWithIn(int noOfKeys, int withIn) {
         Random random = new Random();
-        IntStream.of(noOfKeys).forEach((keyNo) -> {
+        for (int i = 0; i < noOfKeys; i++) {
             try {
                 String key = "key-" + random.nextInt(withIn);
+                System.out.println("Deleting " + key);
                 keyStore.delete(key);
-            } catch (KeyStoreException ignore) {
+            } catch (KeyStoreException e) {
+                i--;
             }
-        });
+        }
     }
 }

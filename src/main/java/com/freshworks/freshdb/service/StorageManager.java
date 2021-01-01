@@ -42,7 +42,7 @@ public class StorageManager {
         while (curr != null && curr.getNext() != null) {
             StorageEntryNode next = curr.getNext();
             // Bring next forward
-            if (!curr.isAllocated()) {
+            if (!curr.isAllocated() && next.isAllocated()) {
                 file.seek(next.getFilePointer());
                 String contents = file.readUTF();
                 file.seek(curr.getFilePointer());
@@ -53,14 +53,20 @@ public class StorageManager {
                 next.setSize(totalSize - curr.getSize());
 
                 next.setFilePointer(curr.getFilePointer() + curr.getSize());
-            }
-            curr = next;
+
+                curr.setAllocated(true);
+                next.setAllocated(false);
+                curr = next;
+            } else if (!curr.isAllocated() && !next.isAllocated()) {
+                mergeNextNode(curr);
+            } else curr = curr.getNext();
         }
     }
 
     void free(StorageEntry entry) {
         StorageEntryNode entryNode = (StorageEntryNode) entry;
         entryNode.setAllocated(false);
+        usedSpace -= entry.getSize();
         mergePrevNode(entryNode);
         mergeNextNode(entryNode);
     }
