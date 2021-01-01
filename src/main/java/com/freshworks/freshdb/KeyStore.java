@@ -2,9 +2,10 @@ package com.freshworks.freshdb;
 
 import com.freshworks.freshdb.exception.*;
 
+import java.io.Closeable;
 import java.io.IOException;
 
-public interface KeyStore {
+public interface KeyStore extends Closeable {
 
     /**
      * Stores the value for the key

@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import java.nio.channels.FileLock;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,6 +19,7 @@ public class FreshDBStore implements KeyStore {
     private static final int MAX_VALUE_SIZE = 16 * 1024;
 
     private final RandomAccessFile valuesFile;
+    private final FileLock valuesFileLock;
     private final Map<String, KeyMeta> keyToMetaMap = new ConcurrentHashMap<>();
     private final StorageManager storageManager;
     private final SortedSet<KeyMeta> keysMetaWithExpiry =
@@ -36,6 +38,7 @@ public class FreshDBStore implements KeyStore {
         } else file = new File(fileName);
 
         valuesFile = new RandomAccessFile(file, "rwd");
+        valuesFileLock = valuesFile.getChannel().lock();
         storageManager = StorageManager.getInstance(valuesFile);
     }
 
@@ -111,6 +114,11 @@ public class FreshDBStore implements KeyStore {
             delete(curr.getKey());
             keysMetaWithExpiry.remove(curr);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        valuesFileLock.release();
     }
 
     private static class CompareExpiryOfMeta implements Comparator<KeyMeta> {
