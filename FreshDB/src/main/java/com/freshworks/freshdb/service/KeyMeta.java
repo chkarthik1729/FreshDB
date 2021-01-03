@@ -16,7 +16,7 @@ public class KeyMeta {
     }
 
     public boolean isExpired() {
-        return System.currentTimeMillis() > expiresAt;
+        return expiresAt != -1 && System.currentTimeMillis() > expiresAt;
     }
 
     public String getKey() {

@@ -43,7 +43,7 @@ public class FreshDBStore implements KeyStore {
 
     @Override
     public void create(String key, String value) throws KeyStoreException, IOException {
-        createInternal(key, value, Long.MAX_VALUE);
+        createInternal(key, value, -1);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class FreshDBStore implements KeyStore {
         KeyMeta meta = KeyMeta.from(key, entry, expiresAt);
         keyToMetaMap.put(key, meta);
         writeValue(entry.getFilePointer(), value);
-        keysMetaWithExpiry.add(meta);
+        if (expiresAt != -1) keysMetaWithExpiry.add(meta);
     }
 
     @Override
