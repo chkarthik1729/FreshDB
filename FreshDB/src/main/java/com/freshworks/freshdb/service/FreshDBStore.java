@@ -11,7 +11,6 @@ import java.io.RandomAccessFile;
 
 import java.nio.channels.FileLock;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class FreshDBStore implements KeyStore {
 
@@ -20,7 +19,7 @@ public class FreshDBStore implements KeyStore {
 
     private final RandomAccessFile valuesFile;
     private final FileLock valuesFileLock;
-    private final Map<String, KeyMeta> keyToMetaMap = new ConcurrentHashMap<>();
+    private final Map<String, KeyMeta> keyToMetaMap = new HashMap<>();
     private final StorageManager storageManager;
     private final SortedSet<KeyMeta> keysMetaWithExpiry =
             Collections.synchronizedSortedSet(new TreeSet<>(new CompareExpiryOfMeta()));

@@ -56,6 +56,14 @@ public class FreshDBPerformanceTest {
         }
     }
 
+    static void createFiveHundredKeys() throws IOException, KeyStoreException {
+        for (int i = 0; i < 500; i++) {
+            String key = "key-" + i;
+            String value = "value-" + i;
+            keyStore.create(key, value);
+        }
+    }
+
     static void createThousandKeys() throws IOException, KeyStoreException {
         for (int i = 0; i < 1000; i++) {
             String key = "key-" + i;
@@ -64,8 +72,24 @@ public class FreshDBPerformanceTest {
         }
     }
 
+    static void createFiveThousandKeys() throws IOException, KeyStoreException {
+        for (int i = 0; i < 5000; i++) {
+            String key = "key-" + i;
+            String value = "value-" + i;
+            keyStore.create(key, value);
+        }
+    }
+
     static void createTenThousandKeys() throws IOException, KeyStoreException {
         for (int i = 0; i < 10_000; i++) {
+            String key = "key-" + i;
+            String value = "value-" + i;
+            keyStore.create(key, value);
+        }
+    }
+
+    static void createTwentyThousandKeys() throws IOException, KeyStoreException {
+        for (int i = 0; i < 20000; i++) {
             String key = "key-" + i;
             String value = "value-" + i;
             keyStore.create(key, value);
